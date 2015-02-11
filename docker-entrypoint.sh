@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+echo "Mark #1 beginning of script"
+
 if [ -n "$MYSQL_PORT_3306_TCP" ]; then
 	if [ -z "$WORDPRESS_DB_HOST" ]; then
 		WORDPRESS_DB_HOST='mysql'
@@ -33,6 +35,8 @@ if [ -z "$WORDPRESS_DB_PASSWORD" ]; then
 	echo >&2 '  (Also of interest might be WORDPRESS_DB_USER and WORDPRESS_DB_NAME.)'
 	exit 1
 fi
+
+echo "Mark #2 before the creation check"
 
 if ! [ -e index.php -a -e wp-includes/version.php ]; then
 	echo >&2 "WordPress not found in $(pwd) - copying now..."
@@ -72,13 +76,26 @@ set_config() {
 	value="$2"
 	php_escaped_value="$(php -r 'var_export($argv[1]);' "$value")"
 	sed_escaped_value="$(echo "$php_escaped_value" | sed 's/[\/&]/\\&/g')"
-	sed -ri "s/((['\"])$key\2\s*,\s*)(['\"]).*\3/\1$sed_escaped_value/" wp-config.php
+	# sed -ri "s/((['\"])$key\2\s*,\s*)(['\"]).*\3/\1$sed_escaped_value/" wp-config.php
 }
 
+echo "Mark #3 before setting up DB_HOST"
+
 set_config 'DB_HOST' "$WORDPRESS_DB_HOST"
+
+echo "Mark #4 before setting up DB_USER"
+
 set_config 'DB_USER' "$WORDPRESS_DB_USER"
+
+echo "Mark #5 before setting up DB_PASSWORD"
+
 set_config 'DB_PASSWORD' "$WORDPRESS_DB_PASSWORD"
+
+echo "Mark #6 before setting up DB_NAME"
+
 set_config 'DB_NAME' "$WORDPRESS_DB_NAME"
+
+echo "Mark #7 after all settings up"
 
 # allow any of these "Authentication Unique Keys and Salts." to be specified via
 # environment variables with a "WORDPRESS_" prefix (ie, "WORDPRESS_AUTH_KEY")
